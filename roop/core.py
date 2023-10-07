@@ -27,7 +27,6 @@ warnings.filterwarnings('ignore', category=UserWarning, module='torchvision')
 
 
 def parse_args() -> None:
-    update_status('parse_args')
     signal.signal(signal.SIGINT, lambda signal_number, frame: destroy())
     program = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=100))
     program.add_argument('-s', '--source', help='select an source image', dest='source_path')
