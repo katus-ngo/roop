@@ -70,6 +70,7 @@ def parse_args() -> None:
     roop.globals.max_memory = args.max_memory
     roop.globals.execution_providers = decode_execution_providers(args.execution_provider)
     roop.globals.execution_threads = args.execution_threads
+    update_status('Done parse_args', args)
 
 
 def encode_execution_providers(execution_providers: List[str]) -> List[str]:
@@ -99,8 +100,11 @@ def limit_resources() -> None:
             tensorflow.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)
         ])
     # limit memory usage
+    
+    update_status('roop.globals.max_memory:', roop.globals.max_memory)
     if roop.globals.max_memory:
         memory = roop.globals.max_memory * 1024 ** 3
+        update_status('platform.system().lower():', platform.system().lower())
         if platform.system().lower() == 'darwin':
             memory = roop.globals.max_memory * 1024 ** 6
         if platform.system().lower() == 'windows':
@@ -208,13 +212,17 @@ def destroy() -> None:
 def run() -> None:
     parse_args()
     if not pre_check():
+        update_status('pre_check')
         return
     for frame_processor in get_frame_processors_modules(roop.globals.frame_processors):
         if not frame_processor.pre_check():
+            update_status('not frame_processor.pre_check')
             return
     limit_resources()
     if roop.globals.headless:
+        update_status('roop.globals.headless')
         start()
     else:
+        update_status('window')
         window = ui.init(start, destroy)
         window.mainloop()
