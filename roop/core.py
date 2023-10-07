@@ -27,6 +27,7 @@ warnings.filterwarnings('ignore', category=UserWarning, module='torchvision')
 
 
 def parse_args() -> None:
+    update_status('parse_args')
     signal.signal(signal.SIGINT, lambda signal_number, frame: destroy())
     program = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=100))
     program.add_argument('-s', '--source', help='select an source image', dest='source_path')
@@ -70,7 +71,6 @@ def parse_args() -> None:
     roop.globals.max_memory = args.max_memory
     roop.globals.execution_providers = decode_execution_providers(args.execution_provider)
     roop.globals.execution_threads = args.execution_threads
-    update_status('Done parse_args', args)
 
 
 def encode_execution_providers(execution_providers: List[str]) -> List[str]:
@@ -101,10 +101,10 @@ def limit_resources() -> None:
         ])
     # limit memory usage
     
-    update_status('roop.globals.max_memory:', roop.globals.max_memory)
+    update_status(f'roop.globals.max_memory: {roop.globals.max_memory}')
     if roop.globals.max_memory:
         memory = roop.globals.max_memory * 1024 ** 3
-        update_status('platform.system().lower():', platform.system().lower())
+        update_status(f'platform.system().lower(): {platform.system().lower()}')
         if platform.system().lower() == 'darwin':
             memory = roop.globals.max_memory * 1024 ** 6
         if platform.system().lower() == 'windows':
@@ -135,10 +135,12 @@ def update_status(message: str, scope: str = 'ROOP.CORE') -> None:
 def start() -> None:
     for frame_processor in get_frame_processors_modules(roop.globals.frame_processors):
         if not frame_processor.pre_start():
+            update_status('frame_processor.pre_start')
             return
     # process image to image
     if has_image_extension(roop.globals.target_path):
         if predict_image(roop.globals.target_path):
+            update_status('predict_image(roop.globals.target_path)')
             destroy()
         shutil.copy2(roop.globals.target_path, roop.globals.output_path)
         # process frame
@@ -154,6 +156,7 @@ def start() -> None:
         return
     # process image to videos
     if predict_video(roop.globals.target_path):
+        update_status('predict_video(roop.globals.target_path)')
         destroy()
     update_status('Creating temporary resources...')
     create_temp(roop.globals.target_path)
